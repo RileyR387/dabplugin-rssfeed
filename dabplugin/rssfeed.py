@@ -12,8 +12,12 @@ from hashlib import sha1
 from bs4 import BeautifulSoup
 
 defaultHeaders = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "user-agent": 'curl/7.68.0',
 }
+
+class FeedException:
+    pass
 
 class RSSFeed:
     def __init__(self, url):
@@ -26,6 +30,8 @@ class RSSFeed:
     def CacheFeed(self):
         try:
             r = requests.get(self.url, headers=defaultHeaders)
+            if r.status_code != 200:
+                raise FeedException
             soup = BeautifulSoup(r.content, features='xml')
             articles = soup.findAll('item')
             self.feedTitle = soup.find('channel').find("title").text
@@ -37,13 +43,15 @@ class RSSFeed:
                 self.seenHashes[itemHash] = True
 
         except Exception as e:
-            print("Failed to process feed ({}) with error: {}".format(self.url, e))
+            print("Failed to process feed ({}) with error: {}".format(self.url, e ))
+            print("Headers:\n{}\nContent:\n{}".format(r.headers, r.content ))
 
     def NewData(self):
-        #print( "Refreshing: " + self.url )
         newItems = []
         try:
             r = requests.get(self.url, headers=defaultHeaders)
+            if r.status_code != 200:
+                raise FeedException
             soup = BeautifulSoup(r.content, features='xml')
             articles = soup.findAll('item')
             for a in articles:
