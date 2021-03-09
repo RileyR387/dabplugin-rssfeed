@@ -68,5 +68,12 @@ class BotPlugin:
                     self._PublishItem( item )
 
     def _PublishItem(self, item):
-        self.SendMessage( messageTemplate.render( **item ) )
+        #self.SendMessage( messageTemplate.render( **item ) )
+        self.SendMessage({
+            'type': 'rich',
+            'title': item['title'],
+            'url': item['link'],
+            'author': item['channel'],
+            'description': item['channel']
+        })
 
