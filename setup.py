@@ -6,7 +6,8 @@ requires = [
     'jinja2',
     'pytz',
     'tzlocal',
-    'bs4'
+    'bs4',
+    'lxml'
 ]
 
 dev_requires = [
@@ -15,7 +16,7 @@ dev_requires = [
 
 setup(
     name='dabplugin-rssfeed',
-    version='0.0.1',
+    version='0.0.2',
     author='Riley Raschke',
     author_email='riley@rrappsdev.com',
     scripts=['rssfeed-plugin.py'],

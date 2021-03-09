@@ -1,5 +1,4 @@
 
-import os
 import requests
 import re
 
@@ -8,45 +7,61 @@ from datetime import datetime
 import pytz
 from tzlocal import get_localzone
 
+from hashlib import sha1
+
 from bs4 import BeautifulSoup
-from jinja2 import Environment, BaseLoader
 
+defaultHeaders = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+}
 
-class BotPlugin:
-    def __init__(self, msgCallback):
-        self.name = "rssplugin"
-        self.SendMessage = msgCallback
-        self._initEnv()
-        self._refreshFeeds()
+class RSSFeed:
+    def __init__(self, url):
+        self.url = url
+        self.seenHashes = {}
+        self.feedTitle = ""
+        self.CacheFeed()
+        print("Cached current feed from: {}".format(self.feedTitle))
 
-    # Parent is stopping, maintenance op for clean exit
-    def Stop(self):
-        print("Stopping plugin...")
-        None
+    def CacheFeed(self):
+        try:
+            r = requests.get(self.url, headers=defaultHeaders)
+            soup = BeautifulSoup(r.content, features='xml')
+            articles = soup.findAll('item')
+            self.feedTitle = soup.find('channel').find("title").text
+            for a in articles:
+                title = a.find('title').text
+                link = a.find('link').text
+                published = a.find('pubDate').text
+                itemHash = sha1( (title + link + published).encode() ).hexdigest()
+                self.seenHashes[itemHash] = True
 
-    # Run custom threads/refreshes here, using `self.SendMessage`
-    # on demand for the default or configured channel ID's
-    def Run(self):
-        print("Running plugin!")
-        None
+        except Exception as e:
+            print("Failed to process feed ({}) with error: {}".format(self.url, e))
 
-    # The alert bot service can be configured to run this based on primary services config
-    def Job(self):
-        print("Running plugin job!")
-        None
+    def NewData(self):
+        print( "Refreshing: " + self.url )
+        newItems = []
+        try:
+            r = requests.get(self.url, headers=defaultHeaders)
+            soup = BeautifulSoup(r.content, features='xml')
+            articles = soup.findAll('item')
+            for a in articles:
+                title = a.find('title').text
+                link = a.find('link').text
+                published = a.find('pubDate').text
 
-    # Custom message interpriters for the plugin
-    async def ProcessMessage(self, message):
-        None
+                itemHash = sha1( (title + link + published).encode() ).hexdigest()
 
-    def _initEnv(self):
-        self.channels = []
-        self.feeds = []
-        for channel in os.getenv('RSSFEED_CHANNEL_IDS').split(','):
-            self.channels.append(int(channel.strip()))
-        for feed in os.getenv('RSSFEED_FEED_URIS').split(' '):
-            self.feeds.append(feed)
-
-    def _refreshFeeds(self):
-        None
+                if itemHash not in self.seenHashes.keys():
+                    self.seenHashes[itemHash] = True
+                    newItems.append({
+                        "channel": self.feedTitle,
+                        "title": title,
+                        "link": link,
+                        "published": published,
+                    })
+        except Exception as e:
+            print("Failed to refresh feed ({}) with error: {}".format(self.url, e))
+        return newItems
 
