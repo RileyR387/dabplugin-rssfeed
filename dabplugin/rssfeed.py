@@ -29,7 +29,6 @@ class RSSFeed:
             soup = BeautifulSoup(r.content, features='xml')
             articles = soup.findAll('item')
             self.feedTitle = soup.find('channel').find("title").text
-            i = 0
             for a in articles:
                 title = a.find('title').text
                 link = a.find('link').text
@@ -37,7 +36,6 @@ class RSSFeed:
                 itemHash = sha1( (title + link + published).encode() ).hexdigest()
                 if i != 0:
                     self.seenHashes[itemHash] = True
-                i+=1
 
         except Exception as e:
             print("Failed to process feed ({}) with error: {}".format(self.url, e))
