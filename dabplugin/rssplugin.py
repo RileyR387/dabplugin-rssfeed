@@ -40,7 +40,7 @@ class BotPlugin:
 
     # The alert bot service can be configured to run this based on primary services config
     def Job(self):
-        self.SendMessage("Test message from external plugin job")
+        #self.SendMessage("Test message from external plugin job")
         None
 
     def _initEnv(self):
