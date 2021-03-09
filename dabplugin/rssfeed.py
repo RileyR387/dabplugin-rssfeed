@@ -34,8 +34,7 @@ class RSSFeed:
                 link = a.find('link').text
                 published = a.find('pubDate').text
                 itemHash = sha1( (title + link + published).encode() ).hexdigest()
-                if i != 0:
-                    self.seenHashes[itemHash] = True
+                self.seenHashes[itemHash] = True
 
         except Exception as e:
             print("Failed to process feed ({}) with error: {}".format(self.url, e))
