@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+'''
+    Wrapper script for plugin development/testing.
+'''
+
 import sys
 import signal
 import time
@@ -65,7 +69,6 @@ class DevPlugin:
             print("Error, invalide message options provided")
 
 
-
 devPlugin = DevPlugin()
 
 signal.signal(signal.SIGTERM, devPlugin.stop)
@@ -77,4 +80,5 @@ except ServiceExit:
     exit(0)
 except Exception as e:
     print("Event loop terminated with error: {}".format(e))
+
 

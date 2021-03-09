@@ -29,8 +29,9 @@ class BotPlugin:
         self.isRunning = False
         print("Stopping plugin...")
 
-    # Run custom threads/refreshes here, using `self.SendMessage`
-    # on demand for the default or configured channel ID's
+    # Run asyncio tasks here within the discord event loop,
+    # using `self.SendMessage` on demand for the default
+    # or configured channel ID's
     async def Run(self):
         while self.isRunning:
             if self._shouldRefresh():
@@ -39,7 +40,6 @@ class BotPlugin:
 
     # The alert bot service can be configured to run this based on primary services config
     def Job(self):
-        #print("Running plugin job!")
         self.SendMessage("Test message from external plugin job")
         None
 
