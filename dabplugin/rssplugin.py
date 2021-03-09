@@ -18,6 +18,7 @@ class BotPlugin:
         self.SendMessage = msgCallback
         self._initEnv()
         self.lastRefresh = time.time()
+        self.isRunning = True
 
     # Custom message interpriters for the plugin
     async def ProcessMessage(self, message):
